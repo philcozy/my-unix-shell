@@ -6,13 +6,18 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <setjmp.h>
 
 #define CLOSE "\001\033[0m\002"                 // 关闭所有属性
 #define BLOD  "\001\033[1m\002"                 // 强调、加粗、高亮
 #define BEGIN(x,y) "\001\033["#x";"#y"m\002"    // x: 背景，y: 前景
 
+static volatile sig_atomic_t jump = 0;
+static sigjmp_buf env;
+
 char** get_input(char* input);
 int cd(char* path);
+void sigint_handler(int signo);
 
 int main()
 {
@@ -21,11 +26,30 @@ int main()
   char* input;
   int stat;
 
-  signal(SIGINT, SIG_IGN); //ignore signal in father process
+    struct sigaction s;
+    s.sa_handler = sigint_handler;
+    sigemptyset(&s.sa_mask);
+    s.sa_flags = SA_RESTART;
+    sigaction(SIGINT, &s, NULL);
 
   while(1)
   {
+    if(sigsetjmp(env, 1) == 42)
+    {
+      puts("\n");
+      continue;
+    }
+
+    jump = 1;
+
     input = readline(BEGIN(49, 34)"unixsh> "CLOSE);
+
+    if(input == NULL) //Ctrl^D
+    {
+      puts("\n");
+      exit(0);
+    }
+
     command = get_input(input);
 
     if(strcmp(command[0], "cd") == 0) // strcmp() return 0 when strings are the same
@@ -48,7 +72,12 @@ int main()
 
     if(child_pid == 0)
     {
-      signal(SIGINT, SIG_DFL);
+      struct sigaction s_child;
+      s_child.sa_handler = SIG_DFL;
+      sigemptyset(&s_child.sa_mask);
+      s_child.sa_flags = SA_RESTART;
+      sigaction(SIGINT, &s_child, NULL);
+
       if(execvp(command[0], command) < 0)
       {
         perror(command[0]);
@@ -105,4 +134,14 @@ char** get_input(char* input)
 int cd(char* path)
 {
   return chdir(path);
+}
+
+void sigint_handler(int signo)
+{
+  if(!jump)
+  {
+    return;
+  }
+
+  siglongjmp(env, 42);
 }
