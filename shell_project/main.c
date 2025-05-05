@@ -48,6 +48,13 @@ int main()
       continue; // Skip the fork
     }
 
+    if (strcmp(command[0], "exit") == 0) 
+    { // if command is exit
+      free(input);
+      free(command);
+      exit(0);
+    }
+
     run_command(command);
 
     free(input); free(command);
