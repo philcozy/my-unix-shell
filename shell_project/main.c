@@ -50,7 +50,7 @@ int main()
 
     if (strcmp(command[0], "exit") == 0) 
     { // if command is exit
-      free(input);
+      free(input); // Dont forget free!
       free(command);
       exit(0);
     }
