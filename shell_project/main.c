@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <readline/readline.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define CLOSE "\001\033[0m\002"                 // 关闭所有属性
 #define BLOD  "\001\033[1m\002"                 // 强调、加粗、高亮
