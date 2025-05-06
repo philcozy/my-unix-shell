@@ -22,7 +22,7 @@ char** get_input(char* input)
     commands[index] = parsed;
     index++;
 
-    if(index > buffsize)
+    if(index >= buffsize)
     {
       buffsize *= 2;
       commands = realloc(commands, buffsize * sizeof(char*));
