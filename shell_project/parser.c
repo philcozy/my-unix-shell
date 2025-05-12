@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "shell.h"
 
-char** get_input(char* input)
+char** get_input(char* raw_input)
 {
   int buffsize = 8;
   char** commands = malloc(buffsize * sizeof(char*));
@@ -13,7 +13,8 @@ char** get_input(char* input)
     perror("Malloc Fails");
     exit(1);
   }
-
+  
+  char* input = space_trim(raw_input);
   char* parsed = strtok(input, " ");
   int index = 0;
 
@@ -39,3 +40,29 @@ char** get_input(char* input)
   commands[index] = NULL;
   return commands;
 }
+
+char* space_trim(char* raw_input) //removes leading and trailing spaces
+{
+  while(*raw_input == ' ')
+  {
+    raw_input++;
+  }
+
+  if(*raw_input == 0)
+  {
+    return raw_input;
+  }
+  
+  char* end = raw_input + strlen(raw_input) - 1;
+
+  while(end > raw_input && *end == ' ')
+  {
+    end--;
+  }
+
+  *(end + 1) = 0;
+
+  return raw_input;
+
+}
+

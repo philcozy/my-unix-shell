@@ -15,7 +15,7 @@ sigjmp_buf env;
 int main()
 {
   char** command;
-  char* input;
+  char* raw_input;
 
   father_sigint_settings();
 
@@ -29,15 +29,23 @@ int main()
 
     jump = 1;
 
-    input = readline(BEGIN(49, 34)"unixsh> "CLOSE);
+    raw_input = readline(BEGIN(49, 34)"unixsh> "CLOSE);
 
-    if(input == NULL) //Ctrl^D
+    if(raw_input == NULL) //Ctrl^D
     {
       puts("\n");
       exit(0);
     }
 
-    command = get_input(input);
+    if(has_pipe(raw_input))
+    {
+      handle_pipe(raw_input);
+      continue;
+    }
+    else
+    {
+      command = get_input(raw_input);
+    }
 
     if(strcmp(command[0], "cd") == 0) // strcmp() return 0 when strings are the same
     {
@@ -51,7 +59,7 @@ int main()
 
     run_command(command);
 
-    free(input); free(command);
+    free(raw_input); free(command);
   }
 }
 
