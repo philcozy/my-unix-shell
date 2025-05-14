@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 #include "shell.h"
 
 int has_pipe(char* raw_input)
@@ -41,6 +42,12 @@ void handle_pipe(char* raw_input)
 
     execvp(left_commands[0], left_commands);
   }
+  else if(child_1 < 0)
+  {
+    perror("Fork Failed");
+    exit(1);
+  }
+
   pid_t child_2 = fork(); // Child 2: reader (e.g., grep)
   if(child_2 == 0)
   {
@@ -49,6 +56,11 @@ void handle_pipe(char* raw_input)
     close(mypipe[0]);
 
     execvp(right_commands[0], right_commands);
+  }
+  else if(child_2 < 0)
+  {
+    perror("Fork Failed");
+    exit(1);
   }
 
   close(mypipe[0]);
