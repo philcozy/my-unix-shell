@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -30,6 +31,7 @@ int main()
     jump = 1;
 
     raw_input = readline(BEGIN(49, 34)"unixsh> "CLOSE);
+    add_history(raw_input);
 
     if(raw_input == NULL) //Ctrl^D
     {
